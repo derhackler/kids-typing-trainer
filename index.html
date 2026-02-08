@@ -1537,6 +1537,7 @@ async loadGif() {
 
   const tags = ['cute+animal', 'funny+animal', 'baby+animal', 'cute+cat', 'cute+dog', 'cute+bunny', 'cute+puppy', 'cute+kitten'];
   const tag = tags[Math.floor(Math.random() * tags.length)];
+  let responseJson = null;
 
   try {
     const res = await fetch(
@@ -1544,6 +1545,7 @@ async loadGif() {
     );
 
     const json = await res.json();
+    responseJson = json;
     const gifs = json?.data?.data;
 
     if (!Array.isArray(gifs) || gifs.length === 0) {
@@ -1564,7 +1566,13 @@ async loadGif() {
     container.innerHTML = `<img src="${url}" alt="${gif.title || 'Lustiges Tier'}">`;
   } catch (e) {
     const fallback = ANIMALS[Math.floor(Math.random() * ANIMALS.length)];
-    container.innerHTML = `<div class="gif-fallback">${fallback}</div>`;
+    const debugQuery = tag.replace(/\+/g, ' ');
+    const debugJson = responseJson ? JSON.stringify(responseJson, null, 2) : 'No response';
+    container.innerHTML = `<div class="gif-fallback">${fallback}</div>
+      <div style="font-size:0.55rem;color:var(--clr-text-light);text-align:center;padding:0 8px;max-height:80px;overflow:auto;word-break:break-all;line-height:1.2;">
+        <div>query: <b>${debugQuery}</b> | error: ${e.message}</div>
+        <details><summary>response json</summary><pre style="font-size:0.5rem;text-align:left;margin:2px 0;white-space:pre-wrap;">${debugJson}</pre></details>
+      </div>`;
   }
 },
 
