@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tipp-Trainer - Tippen lernen mit Tieren!</title>
+<style>
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --clr-bg: #FFF8E7;
+  --clr-primary: #FF8C42;
+  --clr-primary-dark: #E07030;
+  --clr-secondary: #4CAF50;
+  --clr-secondary-dark: #388E3C;
+  --clr-accent: #FFD54F;
+  --clr-danger: #EF5350;
+  --clr-text: #3E2723;
+  --clr-text-light: #6D4C41;
+  --clr-white: #FFFFFF;
+  --clr-card: #FFFFFF;
+  --clr-shadow: rgba(0,0,0,0.12);
+
+  /* Finger colors */
+  --finger-l-pinky: #E91E90;
+  --finger-l-ring: #9C27B0;
+  --finger-l-middle: #2196F3;
+  --finger-l-index: #4CAF50;
+  --finger-r-index: #FFEB3B;
+  --finger-r-middle: #FF9800;
+  --finger-r-ring: #F44336;
+  --finger-r-pinky: #795548;
+  --finger-thumb: #9E9E9E;
+
+  --radius: 12px;
+  --shadow: 0 4px 16px var(--clr-shadow);
+  --transition: 0.3s ease;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Segoe UI', 'Arial', sans-serif;
+  background: var(--clr-bg);
+  color: var(--clr-text);
+  overflow-x: hidden;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+}
+
+/* ===== SCREENS ===== */
+.screen {
+  display: none;
+  width: 100%;
+  max-width: 1100px;
+  padding: 24px;
+  animation: fadeIn 0.4s ease;
+}
+.screen.active { display: flex; flex-direction: column; align-items: center; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== HEADER ===== */
+.app-header {
+  width: 100%;
+  text-align: center;
+  padding: 18px 0 8px;
+}
+.app-header h1 {
+  font-size: 2.2rem;
+  color: var(--clr-primary);
+  text-shadow: 2px 2px 0 var(--clr-accent);
+  letter-spacing: 1px;
+}
+.app-header .subtitle {
+  font-size: 1rem;
+  color: var(--clr-text-light);
+  margin-top: 2px;
+}
+.user-badge {
+  position: absolute;
+  top: 18px;
+  right: 24px;
+  background: var(--clr-card);
+  border: 2px solid var(--clr-primary);
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--clr-primary-dark);
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+.user-badge:hover { background: var(--clr-accent); }
+
+/* ===== BUTTONS ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  text-decoration: none;
+  font-family: inherit;
+}
+.btn-primary { background: var(--clr-primary); color: var(--clr-white); box-shadow: 0 3px 0 var(--clr-primary-dark); }
+.btn-primary:hover { background: var(--clr-primary-dark); transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(2px); box-shadow: none; }
+.btn-secondary { background: var(--clr-secondary); color: var(--clr-white); box-shadow: 0 3px 0 var(--clr-secondary-dark); }
+.btn-secondary:hover { background: var(--clr-secondary-dark); transform: translateY(-1px); }
+.btn-secondary:active { transform: translateY(2px); box-shadow: none; }
+.btn-small { padding: 8px 18px; font-size: 0.95rem; }
+
+/* ===== CARDS ===== */
+.card {
+  background: var(--clr-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px;
+  width: 100%;
+}
+
+/* ===== START SCREEN ===== */
+#startScreen {
+  align-items: center;
+  gap: 24px;
+  padding-top: 40px;
+}
+.welcome-art {
+  font-size: 4rem;
+  line-height: 1.2;
+  text-align: center;
+}
+.welcome-text {
+  text-align: center;
+  max-width: 500px;
+}
+.welcome-text h2 { font-size: 1.6rem; margin-bottom: 8px; color: var(--clr-primary-dark); }
+.welcome-text p { font-size: 1.05rem; color: var(--clr-text-light); }
+
+.user-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+  max-width: 600px;
+  width: 100%;
+}
+.user-card {
+  background: var(--clr-card);
+  border: 3px solid var(--clr-accent);
+  border-radius: var(--radius);
+  padding: 16px 24px;
+  cursor: pointer;
+  transition: var(--transition);
+  text-align: center;
+  min-width: 140px;
+  box-shadow: var(--shadow);
+}
+.user-card:hover { border-color: var(--clr-primary); transform: translateY(-3px); box-shadow: 0 6px 20px var(--clr-shadow); }
+.user-card .avatar { font-size: 2.4rem; margin-bottom: 4px; }
+.user-card .uname { font-size: 1.1rem; font-weight: 700; color: var(--clr-text); }
+.user-card .uprogress { font-size: 0.85rem; color: var(--clr-text-light); margin-top: 2px; }
+
+.new-user-form {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 8px;
+}
+.new-user-form input {
+  padding: 12px 18px;
+  border: 2px solid var(--clr-accent);
+  border-radius: var(--radius);
+  font-size: 1.1rem;
+  font-family: inherit;
+  width: 240px;
+  outline: none;
+  transition: var(--transition);
+}
+.new-user-form input:focus { border-color: var(--clr-primary); }
+
+/* ===== TUTORIAL SCREEN ===== */
+#tutorialScreen { gap: 20px; padding-top: 20px; }
+.tutorial-content { max-width: 800px; width: 100%; }
+.tutorial-content h2 { text-align: center; font-size: 1.6rem; color: var(--clr-primary-dark); margin-bottom: 16px; }
+.tutorial-content p { font-size: 1.05rem; line-height: 1.6; margin-bottom: 12px; color: var(--clr-text-light); text-align: center; }
+.finger-guide {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 20px 0;
+}
+.finger-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--clr-bg);
+  font-size: 0.95rem;
+}
+.finger-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.home-row-visual {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+.home-key-demo {
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--clr-white);
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+/* ===== LESSON SCREEN ===== */
+#lessonScreen { gap: 12px; padding-top: 10px; }
+.lesson-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 8px 0;
+}
+.lesson-title { font-size: 1.2rem; font-weight: 700; color: var(--clr-primary-dark); }
+.lesson-stats {
+  display: flex;
+  gap: 20px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+.stat-item { display: flex; align-items: center; gap: 5px; }
+.stat-label { color: var(--clr-text-light); }
+.stat-value { color: var(--clr-primary-dark); font-size: 1.1rem; }
+.stat-value.good { color: var(--clr-secondary); }
+.stat-value.bad { color: var(--clr-danger); }
+
+/* Typing area */
+.typing-area {
+  width: 100%;
+  background: var(--clr-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px 28px;
+  min-height: 120px;
+  position: relative;
+  outline: 2px solid transparent;
+  transition: outline-color 0.2s;
+  cursor: text;
+}
+.typing-area.focused { outline-color: var(--clr-primary); }
+.typing-area.error-flash { outline-color: var(--clr-danger); }
+
+.typing-text {
+  font-size: 1.65rem;
+  line-height: 2;
+  font-family: 'Consolas', 'Courier New', monospace;
+  letter-spacing: 1px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.typing-text .char { transition: color 0.1s, background 0.1s; padding: 1px 0; }
+.typing-text .char.correct { color: var(--clr-secondary); }
+.typing-text .char.incorrect { color: var(--clr-white); background: var(--clr-danger); border-radius: 3px; }
+.typing-text .char.current {
+  border-bottom: 3px solid var(--clr-primary);
+  animation: blink 1s step-end infinite;
+}
+.typing-text .char.pending { color: var(--clr-text-light); }
+
+@keyframes blink {
+  50% { border-bottom-color: transparent; }
+}
+
+.typing-hint {
+  text-align: center;
+  color: var(--clr-text-light);
+  font-size: 0.95rem;
+  margin-top: 6px;
+}
+
+/* ===== KEYBOARD ===== */
+.keyboard-container {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px;
+  background: #E8E0D4;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.kb-row {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+}
+.key {
+  height: 42px;
+  min-width: 42px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: var(--clr-white);
+  border: 2px solid #D0C8BC;
+  cursor: default;
+  transition: all 0.12s;
+  position: relative;
+  color: var(--clr-text);
+  flex-shrink: 0;
+}
+.key.highlight {
+  transform: scale(1.08);
+  z-index: 2;
+  box-shadow: 0 0 12px rgba(255,140,66,0.6);
+  border-color: var(--clr-primary);
+}
+.key.pressed {
+  transform: scale(0.95);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Finger color classes */
+.key.f-lp { background: #FCE4EC; border-color: var(--finger-l-pinky); }
+.key.f-lr { background: #F3E5F5; border-color: var(--finger-l-ring); }
+.key.f-lm { background: #E3F2FD; border-color: var(--finger-l-middle); }
+.key.f-li { background: #E8F5E9; border-color: var(--finger-l-index); }
+.key.f-ri { background: #FFFDE7; border-color: var(--finger-r-index); }
+.key.f-rm { background: #FFF3E0; border-color: var(--finger-r-middle); }
+.key.f-rr { background: #FFEBEE; border-color: var(--finger-r-ring); }
+.key.f-rp { background: #EFEBE9; border-color: var(--finger-r-pinky); }
+.key.f-th { background: #F5F5F5; border-color: var(--finger-thumb); }
+
+.key-space { flex-grow: 1; max-width: 320px; }
+.key-wide { min-width: 64px; font-size: 0.75rem; }
+.key-wider { min-width: 80px; font-size: 0.75rem; }
+.key-widest { min-width: 100px; font-size: 0.75rem; }
+.key-shift { min-width: 90px; font-size: 0.75rem; }
+.key-tab { min-width: 64px; font-size: 0.75rem; }
+.key-caps { min-width: 74px; font-size: 0.75rem; }
+.key-enter { min-width: 80px; font-size: 0.75rem; }
+.key-backspace { min-width: 80px; font-size: 0.75rem; }
+
+/* ===== RESULT SCREEN ===== */
+#resultScreen { gap: 20px; padding-top: 30px; align-items: center; }
+.result-icon { font-size: 5rem; text-align: center; }
+.result-heading {
+  font-size: 1.8rem;
+  text-align: center;
+  margin-bottom: 4px;
+}
+.result-heading.success { color: var(--clr-secondary); }
+.result-heading.fail { color: var(--clr-primary-dark); }
+.result-message {
+  text-align: center;
+  font-size: 1.1rem;
+  color: var(--clr-text-light);
+  max-width: 500px;
+}
+.result-stats {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.result-stat-card {
+  background: var(--clr-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px 28px;
+  text-align: center;
+  min-width: 130px;
+}
+.result-stat-card .rs-value { font-size: 2rem; font-weight: 800; color: var(--clr-primary-dark); }
+.result-stat-card .rs-label { font-size: 0.9rem; color: var(--clr-text-light); margin-top: 2px; }
+.result-stat-card.pass .rs-value { color: var(--clr-secondary); }
+.result-stat-card.fail-stat .rs-value { color: var(--clr-danger); }
+
+.gif-container {
+  width: 300px;
+  height: 220px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--clr-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow);
+  border: 3px solid var(--clr-accent);
+}
+.gif-container img { width: 100%; height: 100%; object-fit: cover; }
+.gif-container .gif-fallback { font-size: 4rem; }
+
+/* ===== CONFETTI ===== */
+.confetti-container {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 999;
+  overflow: hidden;
+}
+.confetti-piece {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: -20px;
+  animation: confettiFall linear forwards;
+}
+@keyframes confettiFall {
+  to { top: 110vh; transform: rotate(720deg); }
+}
+
+/* ===== LESSON INTRO OVERLAY ===== */
+.lesson-intro-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: fadeIn 0.3s ease;
+}
+.lesson-intro-card {
+  background: var(--clr-card);
+  border-radius: var(--radius);
+  padding: 36px 48px;
+  text-align: center;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+  max-width: 400px;
+}
+.lesson-intro-card h2 { font-size: 1.6rem; color: var(--clr-primary-dark); margin-bottom: 8px; }
+.lesson-intro-card p { color: var(--clr-text-light); font-size: 1.05rem; }
+.lesson-intro-card .intro-emoji { font-size: 3rem; margin-bottom: 10px; }
+
+/* ===== PROGRESS BAR ===== */
+.progress-bar-container {
+  width: 100%;
+  height: 8px;
+  background: #E0D6CA;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 4px 0;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--clr-secondary), var(--clr-primary));
+  border-radius: 4px;
+  transition: width 0.3s;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 700px) {
+  .finger-guide { grid-template-columns: 1fr; }
+  .lesson-header { flex-direction: column; gap: 8px; }
+  .key { height: 36px; min-width: 34px; font-size: 0.75rem; }
+  .typing-text { font-size: 1.3rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="app-header">
+  <h1>Tipp-Trainer</h1>
+  <div class="subtitle">Tippen lernen mit Tieren!</div>
+  <div id="userBadge" class="user-badge" style="display:none;" onclick="app.showStartScreen()"></div>
+</header>
+
+<!-- ===== START SCREEN ===== -->
+<div id="startScreen" class="screen active">
+  <div class="welcome-art">&#x1F43E;&#x2328;&#xFE0F;&#x1F43E;</div>
+  <div class="welcome-text">
+    <h2>Willkommen beim Tipp-Trainer!</h2>
+    <p>Lerne mit lustigen Tieren das 10-Finger-Tippen auf der Tastatur!</p>
+  </div>
+  <div id="userList" class="user-list"></div>
+  <div class="new-user-form">
+    <input type="text" id="newUserInput" placeholder="Dein Name..." maxlength="20" autocomplete="off">
+    <button class="btn btn-primary" onclick="app.createUser()">Neuen Spieler erstellen</button>
+  </div>
+</div>
+
+<!-- ===== TUTORIAL SCREEN ===== -->
+<div id="tutorialScreen" class="screen">
+  <div class="tutorial-content card">
+    <h2>So funktioniert das Tippen!</h2>
+    <p>Jeder Finger hat seine eigenen Tasten. Deine Finger starten immer auf der <strong>Grundreihe</strong>:</p>
+
+    <div class="home-row-visual" id="homeRowVisual"></div>
+
+    <p>Deine Zeigefinger liegen auf <strong>F</strong> und <strong>J</strong> &ndash; dort sind kleine Erhebungen, damit du die Tasten auch ohne Hinschauen findest!</p>
+
+    <div class="finger-guide">
+      <div class="finger-item"><div class="finger-dot" style="background:var(--finger-l-pinky)"></div><strong>Linker kleiner Finger:</strong>&nbsp;A</div>
+      <div class="finger-item"><div class="finger-dot" style="background:var(--finger-l-ring)"></div><strong>Linker Ringfinger:</strong>&nbsp;S</div>
+      <div class="finger-item"><div class="finger-dot" style="background:var(--finger-l-middle)"></div><strong>Linker Mittelfinger:</strong>&nbsp;D</div>
+      <div class="finger-item"><div class="finger-dot" style="background:var(--finger-l-index)"></div><strong>Linker Zeigefinger:</strong>&nbsp;F</div>
+      <div class="finger-item"><div class="finger-dot" style="background:var(--finger-r-index)"></div><strong>Rechter Zeigefinger:</strong>&nbsp;J</div>
+      <div class="finger-item"><div class="finger-dot" style="background:var(--finger-r-middle)"></div><strong>Rechter Mittelfinger:</strong>&nbsp;K</div>
+      <div class="finger-item"><div class="finger-dot" style="background:var(--finger-r-ring)"></div><strong>Rechter Ringfinger:</strong>&nbsp;L</div>
+      <div class="finger-item"><div class="finger-dot" style="background:var(--finger-r-pinky)"></div><strong>Rechter kleiner Finger:</strong>&nbsp;&Ouml;</div>
+    </div>
+
+    <p>Die Daumen liegen auf der <strong>Leertaste</strong>. Nach jedem Buchstaben kehren deine Finger zur Grundreihe zur&uuml;ck.</p>
+    <p style="margin-top: 16px; text-align:center;">
+      <button class="btn btn-secondary" onclick="app.completeTutorial()">Los geht's! &#x1F680;</button>
+    </p>
+  </div>
+</div>
+
+<!-- ===== LESSON SCREEN ===== -->
+<div id="lessonScreen" class="screen">
+  <div class="lesson-header">
+    <div>
+      <span class="lesson-title" id="lessonTitle"></span>
+    </div>
+    <div class="lesson-stats">
+      <div class="stat-item"><span class="stat-label">Zeit:</span> <span class="stat-value" id="statTime">3:00</span></div>
+      <div class="stat-item"><span class="stat-label">Genauigkeit:</span> <span class="stat-value" id="statAccuracy">100%</span></div>
+      <div class="stat-item"><span class="stat-label">WPM:</span> <span class="stat-value" id="statWpm">0</span></div>
+    </div>
+  </div>
+  <div class="progress-bar-container"><div class="progress-bar-fill" id="timeProgress" style="width:100%"></div></div>
+  <div class="typing-area" id="typingArea" tabindex="0">
+    <div class="typing-text" id="typingText"></div>
+  </div>
+  <div class="typing-hint" id="typingHint">Klicke hier und fange an zu tippen!</div>
+  <div class="keyboard-container">
+    <div class="keyboard" id="keyboard"></div>
+  </div>
+</div>
+
+<!-- ===== RESULT SCREEN ===== -->
+<div id="resultScreen" class="screen">
+  <div class="result-icon" id="resultIcon"></div>
+  <h2 class="result-heading" id="resultHeading"></h2>
+  <p class="result-message" id="resultMessage"></p>
+  <div class="result-stats" id="resultStats"></div>
+  <div class="gif-container" id="gifContainer"></div>
+  <button class="btn btn-primary" id="resultContinueBtn" onclick="app.continueAfterResult()">Weiter</button>
+</div>
+
+<!-- ===== CONFETTI CONTAINER ===== -->
+<div class="confetti-container" id="confettiContainer"></div>
+
+<!-- ===== LESSON INTRO OVERLAY ===== -->
+<div class="lesson-intro-overlay" id="lessonIntro" style="display:none;">
+  <div class="lesson-intro-card">
+    <div class="intro-emoji" id="introEmoji"></div>
+    <h2 id="introTitle"></h2>
+    <p id="introDesc"></p>
+  </div>
+</div>
+
+<script>
+// ===================================================================
+// 10-FINGER TYPING TRAINER - COMPLETE APPLICATION
+// ===================================================================
+
+const ANIMALS = ['&#x1F436;','&#x1F431;','&#x1F42D;','&#x1F439;','&#x1F430;','&#x1F98A;','&#x1F43B;','&#x1F43C;','&#x1F428;','&#x1F42F;','&#x1F981;','&#x1F42E;','&#x1F437;','&#x1F438;','&#x1F435;','&#x1F427;','&#x1F426;','&#x1F424;','&#x1F987;','&#x1F40A;','&#x1F422;','&#x1F40C;','&#x1F41D;','&#x1F98B;','&#x1F984;','&#x1F993;'];
+const LESSON_EMOJIS = ['&#x1F436;','&#x1F431;','&#x1F42D;','&#x1F430;','&#x1F98A;','&#x1F43B;','&#x1F43C;','&#x1F428;','&#x1F42F;','&#x1F981;','&#x1F42E;','&#x1F437;','&#x1F438;','&#x1F435;','&#x1F427;','&#x1F426;','&#x1F424;','&#x1F987;','&#x1F40A;','&#x1F422;','&#x1F40C;','&#x1F41D;','&#x1F98B;','&#x1F984;','&#x1F993;'];
+const CONFETTI_COLORS = ['#FF6B6B','#4ECDC4','#FFE66D','#A8E6CF','#FF8C42','#C3A6FF','#FF5E78','#55E6C1'];
+
+// ===== AUDIO =====
+class AudioManager {
+  constructor() {
+    this.ctx = null;
+    this.initialized = false;
+  }
+
+  init() {
+    if (this.initialized) return;
+    try {
+      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+      this.initialized = true;
+    } catch(e) { /* no audio support */ }
+  }
+
+  playTone(freq, duration, type = 'sine', vol = 0.15) {
+    if (!this.ctx) return;
+    if (this.ctx.state === 'suspended') this.ctx.resume();
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+    gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start();
+    osc.stop(this.ctx.currentTime + duration);
+  }
+
+  playCorrect() {
+    this.playTone(880, 0.08, 'sine', 0.08);
+  }
+
+  playError() {
+    this.playTone(220, 0.15, 'square', 0.1);
+  }
+
+  playSuccess() {
+    const now = this.ctx ? this.ctx.currentTime : 0;
+    if (!this.ctx) return;
+    if (this.ctx.state === 'suspended') this.ctx.resume();
+    [523, 659, 784, 1047].forEach((f, i) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(f, now + i * 0.12);
+      gain.gain.setValueAtTime(0.15, now + i * 0.12);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.3);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now + i * 0.12);
+      osc.stop(now + i * 0.12 + 0.3);
+    });
+  }
+
+  playFail() {
+    this.playTone(330, 0.2, 'triangle', 0.12);
+    setTimeout(() => this.playTone(260, 0.3, 'triangle', 0.1), 200);
+  }
+}
+
+// ===== KEYBOARD LAYOUT =====
+// German QWERTZ layout with finger assignments
+// Finger codes: lp=left pinky, lr=left ring, lm=left middle, li=left index,
+//               ri=right index, rm=right middle, rr=right ring, rp=right pinky, th=thumb
+const KEYBOARD_ROWS = [
+  // Row 0: Number row
+  [
+    { key: '^', shift: '°', finger: 'lp', code: 'Backquote' },
+    { key: '1', shift: '!', finger: 'lp', code: 'Digit1' },
+    { key: '2', shift: '"', finger: 'lr', code: 'Digit2' },
+    { key: '3', shift: '§', finger: 'lm', code: 'Digit3' },
+    { key: '4', shift: '$', finger: 'li', code: 'Digit4' },
+    { key: '5', shift: '%', finger: 'li', code: 'Digit5' },
+    { key: '6', shift: '&', finger: 'ri', code: 'Digit6' },
+    { key: '7', shift: '/', finger: 'ri', code: 'Digit7' },
+    { key: '8', shift: '(', finger: 'rm', code: 'Digit8' },
+    { key: '9', shift: ')', finger: 'rr', code: 'Digit9' },
+    { key: '0', shift: '=', finger: 'rp', code: 'Digit0' },
+    { key: 'ß', shift: '?', finger: 'rp', code: 'Minus' },
+    { key: '´', shift: '`', finger: 'rp', code: 'Equal' },
+    { key: '<-', finger: 'rp', code: 'Backspace', cls: 'key-backspace' },
+  ],
+  // Row 1: QWERTZ
+  [
+    { key: 'Tab', finger: 'lp', code: 'Tab', cls: 'key-tab' },
+    { key: 'q', finger: 'lp', code: 'KeyQ' },
+    { key: 'w', finger: 'lr', code: 'KeyW' },
+    { key: 'e', finger: 'lm', code: 'KeyE' },
+    { key: 'r', finger: 'li', code: 'KeyR' },
+    { key: 't', finger: 'li', code: 'KeyT' },
+    { key: 'z', finger: 'ri', code: 'KeyY' },
+    { key: 'u', finger: 'ri', code: 'KeyU' },
+    { key: 'i', finger: 'rm', code: 'KeyI' },
+    { key: 'o', finger: 'rr', code: 'KeyO' },
+    { key: 'p', finger: 'rp', code: 'KeyP' },
+    { key: 'ü', finger: 'rp', code: 'BracketLeft' },
+    { key: '+', shift: '*', finger: 'rp', code: 'BracketRight' },
+    { key: 'Enter', finger: 'rp', code: 'Enter', cls: 'key-enter' },
+  ],
+  // Row 2: Home row
+  [
+    { key: 'Caps', finger: 'lp', code: 'CapsLock', cls: 'key-caps' },
+    { key: 'a', finger: 'lp', code: 'KeyA' },
+    { key: 's', finger: 'lr', code: 'KeyS' },
+    { key: 'd', finger: 'lm', code: 'KeyD' },
+    { key: 'f', finger: 'li', code: 'KeyF' },
+    { key: 'g', finger: 'li', code: 'KeyG' },
+    { key: 'h', finger: 'ri', code: 'KeyH' },
+    { key: 'j', finger: 'ri', code: 'KeyJ' },
+    { key: 'k', finger: 'rm', code: 'KeyK' },
+    { key: 'l', finger: 'rr', code: 'KeyL' },
+    { key: 'ö', finger: 'rp', code: 'Semicolon' },
+    { key: 'ä', finger: 'rp', code: 'Quote' },
+    { key: '#', shift: "'", finger: 'rp', code: 'Backslash' },
+  ],
+  // Row 3: Bottom row
+  [
+    { key: 'Shift', finger: 'lp', code: 'ShiftLeft', cls: 'key-shift' },
+    { key: '<', shift: '>', finger: 'lp', code: 'IntlBackslash' },
+    { key: 'y', finger: 'lp', code: 'KeyZ' },
+    { key: 'x', finger: 'lr', code: 'KeyX' },
+    { key: 'c', finger: 'lm', code: 'KeyC' },
+    { key: 'v', finger: 'li', code: 'KeyV' },
+    { key: 'b', finger: 'li', code: 'KeyB' },
+    { key: 'n', finger: 'ri', code: 'KeyN' },
+    { key: 'm', finger: 'ri', code: 'KeyM' },
+    { key: ',', shift: ';', finger: 'rm', code: 'Comma' },
+    { key: '.', shift: ':', finger: 'rr', code: 'Period' },
+    { key: '-', shift: '_', finger: 'rp', code: 'Slash' },
+    { key: 'Shift', finger: 'rp', code: 'ShiftRight', cls: 'key-shift' },
+  ],
+  // Row 4: Space row
+  [
+    { key: '', finger: 'lp', code: 'ControlLeft', cls: 'key-wide', label: 'Strg' },
+    { key: '', finger: 'lp', code: 'MetaLeft', cls: 'key-wide', label: 'Win' },
+    { key: '', finger: 'lp', code: 'AltLeft', cls: 'key-wide', label: 'Alt' },
+    { key: ' ', finger: 'th', code: 'Space', cls: 'key-space', label: 'Leertaste' },
+    { key: '', finger: 'rp', code: 'AltRight', cls: 'key-wide', label: 'Alt' },
+    { key: '', finger: 'rp', code: 'MetaRight', cls: 'key-wide', label: 'Win' },
+    { key: '', finger: 'rp', code: 'ControlRight', cls: 'key-wide', label: 'Strg' },
+  ],
+];
+
+// Map characters to their key codes / finger for quick lookup
+const CHAR_TO_KEY = {};
+const CHAR_TO_FINGER = {};
+function buildCharMap() {
+  for (const row of KEYBOARD_ROWS) {
+    for (const k of row) {
+      const lower = k.key.toLowerCase();
+      if (lower.length === 1) {
+        CHAR_TO_KEY[lower] = k.code;
+        CHAR_TO_FINGER[lower] = k.finger;
+        if (k.shift) {
+          CHAR_TO_KEY[k.shift] = k.code;
+          CHAR_TO_FINGER[k.shift] = k.finger;
+        }
+        // uppercase
+        if (lower.match(/[a-zäöüß]/)) {
+          CHAR_TO_KEY[lower.toUpperCase()] = k.code;
+          CHAR_TO_FINGER[lower.toUpperCase()] = k.finger;
+        }
+      }
+      if (k.shift && k.shift.length === 1) {
+        CHAR_TO_KEY[k.shift] = k.code;
+        CHAR_TO_FINGER[k.shift] = k.finger;
+      }
+    }
+  }
+  CHAR_TO_KEY[' '] = 'Space';
+  CHAR_TO_FINGER[' '] = 'th';
+}
+buildCharMap();
+
+// ===== FINGER CLASS MAP =====
+const FINGER_CLASS = {
+  lp: 'f-lp', lr: 'f-lr', lm: 'f-lm', li: 'f-li',
+  ri: 'f-ri', rm: 'f-rm', rr: 'f-rr', rp: 'f-rp',
+  th: 'f-th'
+};
+
+// ===== LESSON DEFINITIONS =====
+function defineLessons() {
+  const lessons = [];
+
+  // Helper: success criteria
+  function criteria(id) {
+    if (id <= 5) return { minAccuracy: 90, minWpm: 8 };
+    if (id <= 15) return { minAccuracy: 92, minWpm: 10 };
+    return { minAccuracy: 94, minWpm: 12 };
+  }
+
+  // Lessons 1-5: Home row
+  lessons.push({
+    id: 1, title: 'Grundreihe 1', description: 'Lerne die Tasten F und J',
+    targetKeys: ['f', 'j', ' '],
+    sequences: ['ff', 'jj', 'fj', 'jf', 'fjf', 'jfj', 'ff jj', 'fj fj', 'jf jf', 'fjfj', 'jfjf', 'ffjj', 'jjff'],
+    duration: 180, ...criteria(1)
+  });
+  lessons.push({
+    id: 2, title: 'Grundreihe 2', description: 'Lerne die Tasten D und K',
+    targetKeys: ['f', 'j', 'd', 'k', ' '],
+    sequences: ['dd', 'kk', 'dk', 'kd', 'fd', 'jk', 'fdk', 'jkd', 'dkf', 'dk dk', 'fd jk', 'kdf', 'fjdk', 'dkfj'],
+    duration: 180, ...criteria(2)
+  });
+  lessons.push({
+    id: 3, title: 'Grundreihe 3', description: 'Lerne die Tasten S und L',
+    targetKeys: ['f', 'j', 'd', 'k', 's', 'l', ' '],
+    sequences: ['ss', 'll', 'sl', 'ls', 'dsl', 'lkj', 'fds', 'jkl', 'fall', 'lass', 'saal', 'falls', 'sdf jkl', 'lsd klf'],
+    duration: 180, ...criteria(3)
+  });
+  lessons.push({
+    id: 4, title: 'Grundreihe 4', description: 'Lerne die Tasten A und \u00D6',
+    targetKeys: ['f', 'j', 'd', 'k', 's', 'l', 'a', '\u00f6', ' '],
+    sequences: ['aa', '\u00f6\u00f6', 'a\u00f6', '\u00f6a', 'asd', 'j\u00f6l', 'asdf', 'jkl\u00f6', 'falls', 'als', 'all', 'la\u00f6', 'salad', 'fad'],
+    duration: 180, ...criteria(4)
+  });
+  lessons.push({
+    id: 5, title: 'Grundreihe 5', description: 'Alle Tasten der Grundreihe + G und H',
+    targetKeys: ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', '\u00f6', ' '],
+    sequences: ['gg', 'hh', 'gh', 'hg', 'ghs', 'fgh', 'hjk', 'asdf ghjk', 'half', 'glad', 'hash', 'flash', 'glas', 'ahl', 'lag', 'hals', 'gafs', 'hafs'],
+    duration: 180, ...criteria(5)
+  });
+
+  // Lessons 6-10: Upper row
+  lessons.push({
+    id: 6, title: 'Obere Reihe 1', description: 'Lerne E und I',
+    targetKeys: ['a','s','d','f','g','h','j','k','l','\u00f6','e','i',' '],
+    sequences: ['die', 'sie', 'eile', 'leid', 'feil', 'keil', 'seid', 'liege', 'fliege', 'leise', 'diese', 'heide', 'seide', 'geige', 'igel', 'diesel'],
+    duration: 180, ...criteria(6)
+  });
+  lessons.push({
+    id: 7, title: 'Obere Reihe 2', description: 'Lerne R und U',
+    targetKeys: ['a','s','d','f','g','h','j','k','l','\u00f6','e','i','r','u',' '],
+    sequences: ['der', 'und', 'ruf', 'ruhe', 'kurs', 'dauer', 'laufe', 'reise', 'ruhig', 'ufer', 'freude', 'griff', 'gurke', 'druide', 'flieder'],
+    duration: 180, ...criteria(7)
+  });
+  lessons.push({
+    id: 8, title: 'Obere Reihe 3', description: 'Lerne T und Z (auf der deutschen Tastatur)',
+    targetKeys: ['a','s','d','f','g','h','j','k','l','\u00f6','e','i','r','u','t','z',' '],
+    sequences: ['ist', 'zeit', 'sitz', 'jetzt', 'kurz', 'turz', 'sturz', 'katze', 'hitze', 'reiz', 'ziel', 'zeigt', 'stift', 'steigt', 'zufried'],
+    duration: 180, ...criteria(8)
+  });
+  lessons.push({
+    id: 9, title: 'Obere Reihe 4', description: 'Lerne W, O und P',
+    targetKeys: ['a','s','d','f','g','h','j','k','l','\u00f6','e','i','r','u','t','z','w','o','p',' '],
+    sequences: ['wo', 'wort', 'weit', 'oder', 'oper', 'topf', 'wolf', 'post', 'polster', 'power', 'tipp', 'plopp', 'tropf', 'sport', 'worte', 'oase'],
+    duration: 180, ...criteria(9)
+  });
+  lessons.push({
+    id: 10, title: 'Obere Reihe 5', description: 'Lerne Q und \u00DC',
+    targetKeys: ['a','s','d','f','g','h','j','k','l','\u00f6','e','i','r','u','t','z','w','o','p','q','\u00fc',' '],
+    sequences: ['quer', 'quell', '\u00fcber', 'gr\u00fc\u00df', 'gl\u00fcck', 'zur\u00fcck', 'st\u00fchl', 'w\u00fcrfel', 'q\u00e4l', 'qualit\u00e4t', 'quelle', '\u00fcbrig', 'fr\u00fch', 'pr\u00fcfe', 'f\u00fcr'],
+    duration: 180, ...criteria(10)
+  });
+
+  // Lessons 11-15: Lower row
+  lessons.push({
+    id: 11, title: 'Untere Reihe 1', description: 'Lerne N und M',
+    targetKeys: ['a','s','d','f','g','h','j','k','l','\u00f6','e','i','r','u','t','z','w','o','p','q','\u00fc','n','m',' '],
+    sequences: ['name', 'mann', 'lemon', 'mond', 'norden', 'morgen', 'nimm', 'denn', 'innen', 'unten', 'stimme', 'nummer', 'minute', 'turm', 'stern'],
+    duration: 180, ...criteria(11)
+  });
+  lessons.push({
+    id: 12, title: 'Untere Reihe 2', description: 'Lerne B und V',
+    targetKeys: ['a','s','d','f','g','h','j','k','l','\u00f6','e','i','r','u','t','z','w','o','p','q','\u00fc','n','m','b','v',' '],
+    sequences: ['bitte', 'viel', 'verb', 'blume', 'brav', 'vogel', 'biber', 'boden', 'vorne', 'nebel', 'bremse', 'vorbei', 'bleib', 'breit', 'verben'],
+    duration: 180, ...criteria(12)
+  });
+  lessons.push({
+    id: 13, title: 'Untere Reihe 3', description: 'Lerne C und X',
+    targetKeys: ['a','s','d','f','g','h','j','k','l','\u00f6','e','i','r','u','t','z','w','o','p','q','\u00fc','n','m','b','v','c','x',' '],
+    sequences: ['doch', 'auch', 'ich', 'nicht', 'sechs', 'text', 'hexe', 'fuchs', 'wechsel', 'mixer', 'chance', 'fach', 'chef', 'oxid', 'extra'],
+    duration: 180, ...criteria(13)
+  });
+  lessons.push({
+    id: 14, title: 'Untere Reihe 4', description: 'Lerne Y',
+    targetKeys: ['a','s','d','f','g','h','j','k','l','\u00f6','e','i','r','u','t','z','w','o','p','q','\u00fc','n','m','b','v','c','x','y',' '],
+    sequences: ['typ', 'yoga', 'dynamik', 'physik', 'system', 'symbol', 'yacht', 'yak', 'idyll', 'zylinder', 'rhythmus', 'vinyl', 'byte', 'penny', 'party'],
+    duration: 180, ...criteria(14)
+  });
+  lessons.push({
+    id: 15, title: 'Alle Buchstaben!', description: 'Alle Buchstaben auf der Tastatur',
+    targetKeys: ['a','s','d','f','g','h','j','k','l','\u00f6','e','i','r','u','t','z','w','o','p','q','\u00fc','n','m','b','v','c','x','y','\u00e4',' '],
+    sequences: ['der hund', 'die katze', 'ein vogel', 'mein freund', 'deine schule', 'guten morgen', 'ich spiele', 'wir laufen', 'du lachst', 'sie tanzt', 'er schwimmt', 'es regnet', 'viel spass', 'gute nacht', 'bis morgen'],
+    duration: 180, ...criteria(15)
+  });
+
+  // Lessons 16-20: Shift key + capitals
+  lessons.push({
+    id: 16, title: 'Gro\u00dfbuchstaben 1', description: 'Lerne Gro\u00dfbuchstaben mit der Shift-Taste',
+    targetKeys: ['A','S','D','F','G','H','J','K','L','a','s','d','f','g','h','j','k','l',' '],
+    sequences: ['Hallo', 'Land', 'Glas', 'Feld', 'Salat', 'Haus', 'Katze', 'Sofa', 'Lampe', 'Schaf', 'Gabel', 'Falle', 'Klasse', 'Kraft', 'Fluss'],
+    duration: 180, ...criteria(16)
+  });
+  lessons.push({
+    id: 17, title: 'Gro\u00dfbuchstaben 2', description: 'Gro\u00dfbuchstaben der oberen Reihe',
+    targetKeys: ['E','R','T','Z','U','I','O','P','W','Q','e','r','t','z','u','i','o','p','w','q','a','s','d','f','g','h','j','k','l','\u00f6',' '],
+    sequences: ['Tiger', 'Regen', 'Wolke', 'Ozean', 'Polizei', 'Qualle', 'Igel', 'Elefant', 'Perle', 'Turm', 'Reise', 'Insel', 'Ufer', 'Wiese', 'Pizza'],
+    duration: 180, ...criteria(17)
+  });
+  lessons.push({
+    id: 18, title: 'Gro\u00dfbuchstaben 3', description: 'Gro\u00dfbuchstaben der unteren Reihe',
+    targetKeys: ['Y','X','C','V','B','N','M','y','x','c','v','b','n','m','a','s','d','f','g','h','j','k','l','\u00f6','e','i','r','u','t','z','w','o','p',' '],
+    sequences: ['Nase', 'Baum', 'Vogel', 'Computer', 'Xylofon', 'Motor', 'Birne', 'Yacht', 'Bus', 'Nebel', 'Cent', 'Vater', 'Mutter', 'Bruder', 'Chaos'],
+    duration: 180, ...criteria(18)
+  });
+  lessons.push({
+    id: 19, title: 'Ganze S\u00e4tze 1', description: '\u00dcbe ganze S\u00e4tze mit Gro\u00df- und Kleinbuchstaben',
+    targetKeys: null,
+    sequences: ['Der Hund bellt laut.', 'Die Katze schl\u00e4ft.', 'Ein Vogel singt.', 'Ich spiele gern.', 'Wir gehen nach Hause.', 'Er liest ein Buch.', 'Sie malt ein Bild.', 'Das Kind lacht.', 'Der Ball ist rund.', 'Die Sonne scheint.'],
+    duration: 180, ...criteria(19)
+  });
+  lessons.push({
+    id: 20, title: 'Ganze S\u00e4tze 2', description: 'Noch mehr S\u00e4tze zum \u00dcben',
+    targetKeys: null,
+    sequences: ['Mein Freund heisst Tom.', 'Heute ist ein guter Tag.', 'Die Blumen sind bunt.', 'Wir spielen im Garten.', 'Der Kuchen schmeckt gut.', 'Ich mag Schokolade.', 'Morgen gehen wir schwimmen.', 'Papa kocht das Essen.', 'Mama liest eine Geschichte.', 'Der Hase hoppelt schnell.'],
+    duration: 180, ...criteria(20)
+  });
+
+  // Lessons 21-25: Numbers and special characters
+  lessons.push({
+    id: 21, title: 'Zahlen 1', description: 'Lerne die Zahlen 1 bis 5',
+    targetKeys: ['1','2','3','4','5','a','s','d','f','g','h','j','k','l',' '],
+    sequences: ['12345', '1 und 2', '3 und 4', '5 und 1', '11 22 33', '44 55', '123', '321', '4 5 1', '2 3 4', '15 24 33', '42 51', '12 34 55'],
+    duration: 180, ...criteria(21)
+  });
+  lessons.push({
+    id: 22, title: 'Zahlen 2', description: 'Lerne die Zahlen 6 bis 0',
+    targetKeys: ['0','1','2','3','4','5','6','7','8','9','a','s','d','f','g','h','j','k','l',' '],
+    sequences: ['67890', '6 und 7', '8 und 9', '0 und 10', '66 77 88', '99 00', '678', '987', '100', '200', '56 78 90', '10 20 30', '1234567890'],
+    duration: 180, ...criteria(22)
+  });
+  lessons.push({
+    id: 23, title: 'Satzzeichen 1', description: 'Lerne Punkt und Komma',
+    targetKeys: ['.',',',' '],
+    sequences: ['Hallo, wie geht es dir?', 'Gut, danke.', 'Ja, ich komme.', 'Nein, leider nicht.', 'Eins, zwei, drei.', 'Rot, blau, gelb.', 'Montag, Dienstag, Mittwoch.', 'Ich mag Hunde, Katzen, Hasen.'],
+    duration: 180, ...criteria(23)
+  });
+  lessons.push({
+    id: 24, title: 'Satzzeichen 2', description: 'Lerne Fragezeichen und Ausrufezeichen',
+    targetKeys: ['?','!',' ', '.', ','],
+    sequences: ['Wie heisst du?', 'Wo wohnst du?', 'Was machst du?', 'Super!', 'Toll!', 'Wie alt bist du?', 'Hurra!', 'Wo ist die Schule?', 'Komm mit!', 'Wann gehst du?', 'Na klar!', 'Warum nicht?'],
+    duration: 180, ...criteria(24)
+  });
+  lessons.push({
+    id: 25, title: 'Alles zusammen!', description: 'Buchstaben, Zahlen und Satzzeichen',
+    targetKeys: null,
+    sequences: ['Ich bin 9 Jahre alt.', 'Meine Klasse hat 25 Kinder.', 'Wir haben 6 Stunden Schule.', 'Um 13 Uhr gehe ich heim.', 'Hast du 5 Euro?', 'Nein, ich habe nur 3 Euro.', 'Der Bus kommt um 8 Uhr.', 'Morgen ist der 10. Mai!', 'Wie viel ist 7 und 8?', 'Das sind 15!'],
+    duration: 180, ...criteria(25)
+  });
+
+  return lessons;
+}
+
+const LESSONS = defineLessons();
+
+// ===== STORAGE MANAGER =====
+const Storage = {
+  USERS_KEY: 'typingTrainer_users',
+  CURRENT_KEY: 'typingTrainer_currentUser',
+
+  getUsers() {
+    try { return JSON.parse(localStorage.getItem(this.USERS_KEY)) || []; }
+    catch { return []; }
+  },
+  saveUsers(users) {
+    localStorage.setItem(this.USERS_KEY, JSON.stringify(users));
+  },
+  getCurrentUserId() {
+    return localStorage.getItem(this.CURRENT_KEY);
+  },
+  setCurrentUserId(id) {
+    localStorage.setItem(this.CURRENT_KEY, id);
+  },
+  getUser(id) {
+    return this.getUsers().find(u => u.id === id) || null;
+  },
+  updateUser(user) {
+    const users = this.getUsers();
+    const idx = users.findIndex(u => u.id === user.id);
+    if (idx >= 0) { users[idx] = user; } else { users.push(user); }
+    this.saveUsers(users);
+  },
+  createUser(name) {
+    const user = {
+      id: crypto.randomUUID ? crypto.randomUUID() : 'u-' + Date.now() + '-' + Math.random().toString(36).slice(2,8),
+      name,
+      createdAt: Date.now(),
+      currentLesson: 1,
+      completedLessons: [],
+      tutorialCompleted: false
+    };
+    const users = this.getUsers();
+    users.push(user);
+    this.saveUsers(users);
+    return user;
+  }
+};
+
+// ===== ADAPTIVE LEARNING =====
+const Adaptive = {
+  // Analyze error patterns from recent completed lessons
+  getErrorPatterns(user) {
+    const recent = user.completedLessons.slice(-5);
+    const errors = {};
+    for (const cl of recent) {
+      if (cl.errorPatterns) {
+        for (const [key, count] of Object.entries(cl.errorPatterns)) {
+          errors[key] = (errors[key] || 0) + count;
+        }
+      }
+    }
+    return errors;
+  },
+
+  // Generate adapted word list for a lesson, biased toward error-prone keys
+  generateAdaptedSequences(lesson, errorPatterns) {
+    const base = [...lesson.sequences];
+    if (!errorPatterns || Object.keys(errorPatterns).length === 0) return base;
+
+    // Find top error keys
+    const sorted = Object.entries(errorPatterns).sort((a,b) => b[1] - a[1]);
+    const topErrors = sorted.slice(0, 5).map(e => e[0].toLowerCase());
+
+    // Boost sequences that contain error-prone characters
+    const boosted = [];
+    for (const seq of base) {
+      const hasError = topErrors.some(k => seq.toLowerCase().includes(k));
+      if (hasError) {
+        boosted.push(seq, seq); // add twice
+      }
+    }
+    return [...base, ...boosted];
+  },
+
+  // Determine next lesson
+  getNextLesson(user) {
+    return Math.min(user.currentLesson, LESSONS.length);
+  }
+};
+
+// ===== MAIN APPLICATION =====
+const app = {
+  audio: new AudioManager(),
+  currentUser: null,
+  currentLesson: null,
+  lessonState: null,
+  timerInterval: null,
+
+  // DOM refs
+  $: (id) => document.getElementById(id),
+
+  init() {
+    this.renderKeyboard();
+    this.renderHomeRow();
+    this.showStartScreen();
+
+    // Enter key on new user input
+    this.$('newUserInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') this.createUser();
+    });
+  },
+
+  // ===== SCREEN MANAGEMENT =====
+  showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    this.$(id).classList.add('active');
+  },
+
+  showStartScreen() {
+    this.stopLesson();
+    this.currentUser = null;
+    this.$('userBadge').style.display = 'none';
+    this.showScreen('startScreen');
+    this.renderUserList();
+    this.$('newUserInput').value = '';
+  },
+
+  // ===== USER MANAGEMENT =====
+  renderUserList() {
+    const users = Storage.getUsers();
+    const container = this.$('userList');
+    if (users.length === 0) {
+      container.innerHTML = '<p style="color:var(--clr-text-light);text-align:center;">Noch keine Spieler. Erstelle einen neuen!</p>';
+      return;
+    }
+    container.innerHTML = users.map((u, i) => {
+      const emoji = ANIMALS[i % ANIMALS.length];
+      const progress = Math.round(((u.currentLesson - 1) / LESSONS.length) * 100);
+      return `<div class="user-card" onclick="app.selectUser('${u.id}')">
+        <div class="avatar">${emoji}</div>
+        <div class="uname">${this.escapeHtml(u.name)}</div>
+        <div class="uprogress">Lektion ${u.currentLesson} / ${LESSONS.length} (${progress}%)</div>
+      </div>`;
+    }).join('');
+  },
+
+  createUser() {
+    const input = this.$('newUserInput');
+    const name = input.value.trim();
+    if (!name) { input.focus(); return; }
+    const user = Storage.createUser(name);
+    this.selectUser(user.id);
+  },
+
+  selectUser(id) {
+    const user = Storage.getUser(id);
+    if (!user) return;
+    this.currentUser = user;
+    Storage.setCurrentUserId(id);
+    this.audio.init();
+
+    this.$('userBadge').textContent = user.name;
+    this.$('userBadge').style.display = 'block';
+
+    if (!user.tutorialCompleted) {
+      this.showScreen('tutorialScreen');
+    } else {
+      this.startNextLesson();
+    }
+  },
+
+  completeTutorial() {
+    if (!this.currentUser) return;
+    this.currentUser.tutorialCompleted = true;
+    Storage.updateUser(this.currentUser);
+    this.startNextLesson();
+  },
+
+  // ===== LESSON MANAGEMENT =====
+  startNextLesson() {
+    const lessonId = Adaptive.getNextLesson(this.currentUser);
+    const lesson = LESSONS.find(l => l.id === lessonId);
+    if (!lesson) {
+      // All lessons completed
+      this.showAllComplete();
+      return;
+    }
+    this.startLesson(lesson);
+  },
+
+  startLesson(lesson) {
+    this.currentLesson = lesson;
+    this.showScreen('lessonScreen');
+
+    // Show intro overlay
+    this.$('introEmoji').innerHTML = LESSON_EMOJIS[(lesson.id - 1) % LESSON_EMOJIS.length];
+    this.$('introTitle').textContent = lesson.title;
+    this.$('introDesc').textContent = lesson.description;
+    this.$('lessonIntro').style.display = 'flex';
+
+    setTimeout(() => {
+      this.$('lessonIntro').style.display = 'none';
+      this.beginTyping(lesson);
+    }, 2000);
+  },
+
+  beginTyping(lesson) {
+    const errorPatterns = Adaptive.getErrorPatterns(this.currentUser);
+    const sequences = Adaptive.generateAdaptedSequences(lesson, errorPatterns);
+
+    // Generate a long text from sequences (shuffle and repeat to fill 3 min)
+    let textChunks = [];
+    for (let i = 0; i < 20; i++) {
+      const shuffled = [...sequences].sort(() => Math.random() - 0.5);
+      textChunks.push(...shuffled);
+    }
+    const fullText = textChunks.join(' ');
+
+    this.lessonState = {
+      text: fullText,
+      pos: 0,
+      correctCount: 0,
+      totalAttempts: 0,
+      errorPatterns: {},
+      startTime: Date.now(),
+      elapsed: 0,
+      duration: lesson.duration,
+      finished: false,
+      hasError: false
+    };
+
+    this.$('lessonTitle').textContent = lesson.title;
+    this.renderTypingText();
+    this.updateStats();
+    this.startTimer();
+    this.highlightCurrentKey();
+
+    const area = this.$('typingArea');
+    area.focus();
+    area.classList.add('focused');
+    this.$('typingHint').textContent = 'Tippe los!';
+
+    // Key handlers
+    this._keyHandler = (e) => this.handleKey(e);
+    this._focusIn = () => area.classList.add('focused');
+    this._focusOut = () => area.classList.remove('focused');
+    area.addEventListener('keydown', this._keyHandler);
+    area.addEventListener('focusin', this._focusIn);
+    area.addEventListener('focusout', this._focusOut);
+  },
+
+  stopLesson() {
+    if (this.timerInterval) { clearInterval(this.timerInterval); this.timerInterval = null; }
+    const area = this.$('typingArea');
+    if (this._keyHandler) area.removeEventListener('keydown', this._keyHandler);
+    if (this._focusIn) area.removeEventListener('focusin', this._focusIn);
+    if (this._focusOut) area.removeEventListener('focusout', this._focusOut);
+    this.clearKeyboardHighlights();
+  },
+
+  startTimer() {
+    if (this.timerInterval) clearInterval(this.timerInterval);
+    this.timerInterval = setInterval(() => {
+      if (!this.lessonState || this.lessonState.finished) { clearInterval(this.timerInterval); return; }
+      this.lessonState.elapsed = (Date.now() - this.lessonState.startTime) / 1000;
+      this.updateStats();
+
+      if (this.lessonState.elapsed >= this.lessonState.duration) {
+        this.finishLesson();
+      }
+    }, 200);
+  },
+
+  handleKey(e) {
+    if (!this.lessonState || this.lessonState.finished) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    const state = this.lessonState;
+
+    if (e.key === 'Backspace') {
+      if (state.hasError) {
+        state.hasError = false;
+        this.renderTypingText();
+        this.highlightCurrentKey();
+        this.$('typingArea').classList.remove('error-flash');
+      }
+      return;
+    }
+
+    // Ignore modifier keys alone, function keys, etc.
+    if (e.key.length > 1 && e.key !== 'Dead') return;
+    // Handle dead keys (accent combinations) - ignore
+    if (e.key === 'Dead') return;
+
+    const expected = state.text[state.pos];
+    if (expected === undefined) { this.finishLesson(); return; }
+
+    const typed = e.key;
+    state.totalAttempts++;
+
+    if (state.hasError) {
+      // Must press backspace first
+      this.audio.playError();
+      return;
+    }
+
+    if (typed === expected) {
+      state.correctCount++;
+      state.pos++;
+      this.audio.playCorrect();
+      this.$('typingArea').classList.remove('error-flash');
+      this.renderTypingText();
+      this.highlightCurrentKey();
+      this.updateStats();
+
+      // Check if we reached end of generated text
+      if (state.pos >= state.text.length) {
+        this.finishLesson();
+      }
+    } else {
+      // Error
+      state.hasError = true;
+      const errorKey = expected.toLowerCase();
+      state.errorPatterns[errorKey] = (state.errorPatterns[errorKey] || 0) + 1;
+      this.audio.playError();
+      this.$('typingArea').classList.add('error-flash');
+      this.renderTypingText();
+    }
+  },
+
+  finishLesson() {
+    if (this.lessonState.finished) return;
+    this.lessonState.finished = true;
+    this.stopLesson();
+
+    const state = this.lessonState;
+    const elapsed = state.elapsed || ((Date.now() - state.startTime) / 1000);
+    const minutes = elapsed / 60;
+    const wpm = minutes > 0 ? Math.round((state.correctCount / 5) / minutes) : 0;
+    const accuracy = state.totalAttempts > 0 ? Math.round((state.correctCount / state.totalAttempts) * 100) : 0;
+
+    const lesson = this.currentLesson;
+    const passed = accuracy >= lesson.minAccuracy && wpm >= lesson.minWpm;
+
+    // Save result
+    const result = {
+      lessonId: lesson.id,
+      accuracy,
+      wpm,
+      timestamp: Date.now(),
+      errorPatterns: state.errorPatterns
+    };
+    this.currentUser.completedLessons.push(result);
+
+    if (passed) {
+      if (this.currentUser.currentLesson === lesson.id) {
+        this.currentUser.currentLesson = Math.min(lesson.id + 1, LESSONS.length + 1);
+      }
+    }
+    Storage.updateUser(this.currentUser);
+
+    this.showResult(passed, accuracy, wpm);
+  },
+
+  // ===== RESULT SCREEN =====
+  showResult(passed, accuracy, wpm) {
+    this.showScreen('resultScreen');
+
+    const lesson = this.currentLesson;
+
+    if (passed) {
+      this.$('resultIcon').innerHTML = LESSON_EMOJIS[(lesson.id - 1) % LESSON_EMOJIS.length];
+      this.$('resultHeading').textContent = 'Super gemacht!';
+      this.$('resultHeading').className = 'result-heading success';
+      this.$('resultMessage').textContent = 'Du hast die Lektion bestanden! Weiter so!';
+      this.audio.playSuccess();
+      this.showConfetti();
+      this.loadGif();
+    } else {
+      this.$('resultIcon').innerHTML = '&#x1F4AA;';
+      this.$('resultHeading').textContent = '\u00dcbung macht den Meister!';
+      this.$('resultHeading').className = 'result-heading fail';
+      const needed = [];
+      if (accuracy < lesson.minAccuracy) needed.push(`Genauigkeit: ${accuracy}% (brauchst ${lesson.minAccuracy}%)`);
+      if (wpm < lesson.minWpm) needed.push(`Geschwindigkeit: ${wpm} WPM (brauchst ${lesson.minWpm})`);
+      this.$('resultMessage').textContent = `Versuch es noch einmal! ${needed.join('. ')}`;
+      this.audio.playFail();
+      this.$('gifContainer').innerHTML = '<div class="gif-fallback">&#x1F43E;</div>';
+    }
+
+    // Stats
+    const accClass = accuracy >= lesson.minAccuracy ? 'pass' : 'fail-stat';
+    const wpmClass = wpm >= lesson.minWpm ? 'pass' : 'fail-stat';
+    this.$('resultStats').innerHTML = `
+      <div class="result-stat-card ${accClass}"><div class="rs-value">${accuracy}%</div><div class="rs-label">Genauigkeit</div></div>
+      <div class="result-stat-card ${wpmClass}"><div class="rs-value">${wpm}</div><div class="rs-label">W\u00f6rter/Min</div></div>
+      <div class="result-stat-card"><div class="rs-value">${Math.round(this.lessonState.elapsed)}s</div><div class="rs-label">Zeit</div></div>
+    `;
+
+    this.$('resultContinueBtn').textContent = passed ? 'Weiter zur n\u00e4chsten Lektion' : 'Nochmal versuchen';
+  },
+
+  continueAfterResult() {
+    this.startNextLesson();
+  },
+
+  showAllComplete() {
+    this.showScreen('resultScreen');
+    this.$('resultIcon').innerHTML = '&#x1F3C6;';
+    this.$('resultHeading').textContent = 'Alle Lektionen geschafft!';
+    this.$('resultHeading').className = 'result-heading success';
+    this.$('resultMessage').textContent = 'Herzlichen Gl\u00fcckwunsch! Du hast alle 25 Lektionen gemeistert! Du bist jetzt ein Tipp-Profi!';
+    this.$('resultStats').innerHTML = '';
+    this.$('gifContainer').innerHTML = '<div class="gif-fallback">&#x1F389;&#x1F38A;&#x1F3C6;</div>';
+    this.$('resultContinueBtn').textContent = 'Zur\u00fcck zum Start';
+    this.$('resultContinueBtn').onclick = () => {
+      this.$('resultContinueBtn').onclick = () => app.continueAfterResult();
+      this.showStartScreen();
+    };
+    this.audio.playSuccess();
+    this.showConfetti();
+  },
+
+  // ===== RENDERING =====
+  renderTypingText() {
+    const state = this.lessonState;
+    if (!state) return;
+
+    // Show a window of text around current position
+    const windowStart = Math.max(0, state.pos - 30);
+    const windowEnd = Math.min(state.text.length, state.pos + 80);
+    const visible = state.text.slice(windowStart, windowEnd);
+
+    let html = '';
+    for (let i = 0; i < visible.length; i++) {
+      const globalIdx = windowStart + i;
+      const ch = visible[i];
+      const display = ch === ' ' ? '&nbsp;' : this.escapeHtml(ch);
+
+      if (globalIdx < state.pos) {
+        html += `<span class="char correct">${display}</span>`;
+      } else if (globalIdx === state.pos) {
+        if (state.hasError) {
+          html += `<span class="char incorrect current">${display}</span>`;
+        } else {
+          html += `<span class="char current">${display}</span>`;
+        }
+      } else {
+        html += `<span class="char pending">${display}</span>`;
+      }
+    }
+    this.$('typingText').innerHTML = html;
+  },
+
+  updateStats() {
+    const state = this.lessonState;
+    if (!state) return;
+
+    const remaining = Math.max(0, state.duration - state.elapsed);
+    const min = Math.floor(remaining / 60);
+    const sec = Math.floor(remaining % 60);
+    this.$('statTime').textContent = `${min}:${sec.toString().padStart(2, '0')}`;
+
+    const accuracy = state.totalAttempts > 0 ? Math.round((state.correctCount / state.totalAttempts) * 100) : 100;
+    this.$('statAccuracy').textContent = accuracy + '%';
+    this.$('statAccuracy').className = 'stat-value' + (accuracy >= (this.currentLesson?.minAccuracy || 90) ? ' good' : accuracy < 80 ? ' bad' : '');
+
+    const minutes = state.elapsed / 60;
+    const wpm = minutes > 0 ? Math.round((state.correctCount / 5) / minutes) : 0;
+    this.$('statWpm').textContent = wpm;
+    this.$('statWpm').className = 'stat-value' + (wpm >= (this.currentLesson?.minWpm || 8) ? ' good' : '');
+
+    const progress = Math.max(0, (1 - state.elapsed / state.duration)) * 100;
+    this.$('timeProgress').style.width = progress + '%';
+  },
+
+  // ===== KEYBOARD =====
+  renderKeyboard() {
+    const kb = this.$('keyboard');
+    kb.innerHTML = '';
+
+    for (const row of KEYBOARD_ROWS) {
+      const rowDiv = document.createElement('div');
+      rowDiv.className = 'kb-row';
+
+      for (const k of row) {
+        const keyEl = document.createElement('div');
+        const fingerCls = FINGER_CLASS[k.finger] || '';
+        const extraCls = k.cls || '';
+        keyEl.className = `key ${fingerCls} ${extraCls}`.trim();
+        keyEl.dataset.code = k.code;
+
+        const label = k.label || k.key;
+        if (k.shift && k.key.length === 1) {
+          keyEl.innerHTML = `<span style="font-size:0.65rem;opacity:0.6;position:absolute;top:2px;left:5px;">${this.escapeHtml(k.shift)}</span>${this.escapeHtml(label)}`;
+          keyEl.style.position = 'relative';
+        } else {
+          keyEl.textContent = label;
+        }
+
+        // Store lowercase key for lookup
+        keyEl.dataset.char = k.key.toLowerCase();
+        if (k.shift) keyEl.dataset.shift = k.shift;
+
+        rowDiv.appendChild(keyEl);
+      }
+      kb.appendChild(rowDiv);
+    }
+  },
+
+  renderHomeRow() {
+    const homeKeys = [
+      { key: 'A', color: 'var(--finger-l-pinky)' },
+      { key: 'S', color: 'var(--finger-l-ring)' },
+      { key: 'D', color: 'var(--finger-l-middle)' },
+      { key: 'F', color: 'var(--finger-l-index)' },
+      { key: 'J', color: 'var(--finger-r-index)' },
+      { key: 'K', color: 'var(--finger-r-middle)' },
+      { key: 'L', color: 'var(--finger-r-ring)' },
+      { key: '\u00D6', color: 'var(--finger-r-pinky)' },
+    ];
+    const container = this.$('homeRowVisual');
+    container.innerHTML = homeKeys.map(k =>
+      `<div class="home-key-demo" style="background:${k.color}">${k.key}</div>`
+    ).join('');
+  },
+
+  highlightCurrentKey() {
+    this.clearKeyboardHighlights();
+    if (!this.lessonState || this.lessonState.finished) return;
+
+    const expected = this.lessonState.text[this.lessonState.pos];
+    if (expected === undefined) return;
+
+    const code = CHAR_TO_KEY[expected];
+    if (!code) return;
+
+    // Highlight the key
+    const keyEl = this.$('keyboard').querySelector(`[data-code="${code}"]`);
+    if (keyEl) keyEl.classList.add('highlight');
+
+    // If uppercase, also highlight shift
+    if (expected !== expected.toLowerCase() && expected.match(/[A-Z\u00C4\u00D6\u00DC]/)) {
+      // Highlight left shift for right-hand keys, right shift for left-hand keys
+      const finger = CHAR_TO_FINGER[expected] || CHAR_TO_FINGER[expected.toLowerCase()];
+      if (finger && (finger.startsWith('r') || finger === 'th')) {
+        const shiftEl = this.$('keyboard').querySelector('[data-code="ShiftLeft"]');
+        if (shiftEl) shiftEl.classList.add('highlight');
+      } else {
+        const shiftEl = this.$('keyboard').querySelector('[data-code="ShiftRight"]');
+        if (shiftEl) shiftEl.classList.add('highlight');
+      }
+    }
+
+    // For shift characters like ? ! etc
+    if (['?','!','"','§','$','%','&','/','(',')','+','*','>',':',';','_',"'",'°','=','`'].includes(expected)) {
+      // Find which key has this as shift
+      const allKeys = this.$('keyboard').querySelectorAll('.key');
+      for (const el of allKeys) {
+        if (el.dataset.shift === expected) {
+          el.classList.add('highlight');
+          break;
+        }
+      }
+      // Highlight appropriate shift key
+      const finger = CHAR_TO_FINGER[expected];
+      if (finger && (finger.startsWith('r') || finger === 'th')) {
+        const shiftEl = this.$('keyboard').querySelector('[data-code="ShiftLeft"]');
+        if (shiftEl) shiftEl.classList.add('highlight');
+      } else {
+        const shiftEl = this.$('keyboard').querySelector('[data-code="ShiftRight"]');
+        if (shiftEl) shiftEl.classList.add('highlight');
+      }
+    }
+  },
+
+  clearKeyboardHighlights() {
+    this.$('keyboard').querySelectorAll('.key.highlight').forEach(k => k.classList.remove('highlight'));
+  },
+
+  // ===== GIPHY =====
+  async loadGif() {
+    const container = this.$('gifContainer');
+    container.innerHTML = '<div class="gif-fallback" style="font-size:2rem;color:var(--clr-text-light);">Lade Tier-GIF...</div>';
+
+    const tags = ['cute+animal', 'funny+animal', 'baby+animal', 'cute+cat', 'cute+dog', 'cute+bunny', 'cute+puppy', 'cute+kitten'];
+    const tag = tags[Math.floor(Math.random() * tags.length)];
+
+    try {
+      // Use Giphy's public beta key
+      const res = await fetch(`https://api.giphy.com/v1/gifs/random?api_key=0UTRbFtkMxAplrohufYco5IY74U8hOes&tag=${tag}&rating=g`);
+      const data = await res.json();
+      if (data.data && data.data.images) {
+        const url = data.data.images.fixed_height.url;
+        container.innerHTML = `<img src="${url}" alt="Lustiges Tier">`;
+      } else {
+        throw new Error('No GIF data');
+      }
+    } catch (e) {
+      // Fallback: show cute animal emoji
+      const fallback = ANIMALS[Math.floor(Math.random() * ANIMALS.length)];
+      container.innerHTML = `<div class="gif-fallback">${fallback}</div>`;
+    }
+  },
+
+  // ===== CONFETTI =====
+  showConfetti() {
+    const container = this.$('confettiContainer');
+    container.innerHTML = '';
+    for (let i = 0; i < 60; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      const color = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
+      const left = Math.random() * 100;
+      const size = 6 + Math.random() * 10;
+      const duration = 1.5 + Math.random() * 2;
+      const delay = Math.random() * 0.8;
+      const shape = Math.random() > 0.5 ? '50%' : '0';
+      piece.style.cssText = `left:${left}%;width:${size}px;height:${size}px;background:${color};border-radius:${shape};animation-duration:${duration}s;animation-delay:${delay}s;`;
+      container.appendChild(piece);
+    }
+    setTimeout(() => { container.innerHTML = ''; }, 4000);
+  },
+
+  // ===== HELPERS =====
+  escapeHtml(str) {
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+};
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', () => app.init());
+</script>
+</body>
+</html>
