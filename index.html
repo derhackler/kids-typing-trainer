@@ -410,8 +410,8 @@ body {
 .result-stat-card.fail-stat .rs-value { color: var(--clr-danger); }
 
 .gif-container {
-  width: 300px;
-  height: 220px;
+  width: 380px;
+  height: 300px;
   border-radius: var(--radius);
   overflow: hidden;
   background: var(--clr-bg);
@@ -1337,7 +1337,7 @@ const app = {
       if (wpm < lesson.minWpm) needed.push(`Geschwindigkeit: ${wpm} WPM (brauchst ${lesson.minWpm})`);
       this.$('resultMessage').textContent = `Versuch es noch einmal! ${needed.join('. ')}`;
       this.audio.playFail();
-      this.$('gifContainer').innerHTML = '<div class="gif-fallback">&#x1F43E;</div>';
+      this.loadFailGif();
     }
 
     // Stats
@@ -1573,6 +1573,42 @@ async loadGif() {
         <div>query: <b>${debugQuery}</b> | error: ${e.message}</div>
         <details><summary>response json</summary><pre style="font-size:0.5rem;text-align:left;margin:2px 0;white-space:pre-wrap;">${debugJson}</pre></details>
       </div>`;
+  }
+},
+
+async loadFailGif() {
+  const container = this.$('gifContainer');
+  container.innerHTML = '<div class="gif-fallback" style="font-size:2rem;color:var(--clr-text-light);">Lade GIF...</div>';
+
+  const tags = ['crying+funny', 'sad+funny', 'fail+funny', 'crying+person', 'dramatic+cry', 'sobbing+funny'];
+  const tag = tags[Math.floor(Math.random() * tags.length)];
+  let responseJson = null;
+
+  try {
+    const res = await fetch(
+      `https://api.klipy.com/api/v1/8XIKnmqhvGaN255TphNys9nfqnrF2f3lVJu0uC9utF5MEXLMCYj0VFyFRiMMtT2B/gifs/search?page=1&per_page=10&q=${tag}&customer_id=tipptrainer&locale=de&content_filter=medium&format_filter=gif`
+    );
+
+    const json = await res.json();
+    responseJson = json;
+    const gifs = json?.data?.data;
+
+    if (!Array.isArray(gifs) || gifs.length === 0) {
+      throw new Error('No GIF data');
+    }
+
+    const gif = gifs[Math.floor(Math.random() * gifs.length)];
+
+    const url =
+      gif?.file?.md?.gif?.url ||
+      gif?.file?.sm?.gif?.url ||
+      gif?.file?.hd?.gif?.url;
+
+    if (!url) throw new Error('No GIF url');
+
+    container.innerHTML = `<img src="${url}" alt="${gif.title || 'Lustiges GIF'}">`;
+  } catch (e) {
+    container.innerHTML = '<div class="gif-fallback">&#x1F622;</div>';
   }
 },
 
